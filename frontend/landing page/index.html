@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body>
+
+    <!-- Day/Night Toggle -->
+    <div class="toggle-container">
+        <label class="switch">
+            <input type="checkbox" id="theme-toggle">
+            <span class="slider"></span>
+        </label>
+    </div>
+
+    <div class="container" id="loginContainer">
+        <!-- Sign In Form -->
+        <div class="form-container" id="loginForm">
+            <h2 class="sign-in">Sign In</h2>
+            <input type="text" id="login-email" placeholder="Username" required>
+            
+            <div class="password-container">
+                <input type="password" id="login-password" placeholder="Password" required>
+                <span class="toggle-password" onclick="togglePasswordVisibility('login-password', 'eye-icon-login')">
+                    <i id="eye-icon-login" class="fa fa-eye"></i>
+                </span>
+            </div>
+            
+            
+            <!-- Dropdown menu styled as input -->
+            <select id="options" class="custom-select" required>
+                <option value="" disabled selected>Select an option</option>
+                <option value="Option 1">Option 1</option>
+                <option value="Option 2">Option 2</option>
+                <option value="Option 3">Option 3</option>
+                <option value="Option 4">Option 4</option>
+                <option value="Option 5">Option 5</option>
+                <option value="Option 6">Option 6</option>
+                <option value="Option 7">Option 7</option>
+                <option value="Option 8">Option 8</option>
+                <option value="Option 9">Option 9</option>
+                <option value="Option 10">Option 10</option>
+            </select>
+
+            <button onclick="login()">Login</button>
+            <p><a href="#" onclick="forgotPassword()">Forgot Password?</a></p>
+            <p>Don't have an account? <a href="#" onclick="showSignUp()">Sign Up</a></p>
+        </div>
+
+        <!-- Sign Up Form -->
+        <div class="form-container hidden" id="signUpForm">
+            <h2>Sign Up</h2>
+            <input type="text" id="signup-firstname" placeholder="First Name">
+            <input type="text" id="signup-lastname" placeholder="Last Name">
+            <input type="text" id="signup-username" placeholder="Username">
+            <input type="email" id="signup-email" placeholder="Email">
+            
+            <div class="password-container">
+                <input type="password" id="signup-password" placeholder="Password">
+                <span class="toggle-password" onclick="togglePasswordVisibility('signup-password', 'eye-icon-signup')">
+                    <i id="eye-icon-signup" class="fa fa-eye"></i>
+                </span>
+            </div>
+            
+            
+            <input type="date" id="signup-dob" placeholder="Date of Birth">
+            <button onclick="signUp()">Sign Up</button>
+            <p>Already have an account? <a href="#" onclick="showLogin()">Sign In</a></p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

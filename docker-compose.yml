@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - ./uploads:/app/uploads
+      - ./persistent_data:/app/persistent_data
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  frontend-static:
+    image: python:3.10-slim
+    working_dir: /app
+    command: python -m http.server 8987
+    ports:
+      - "8987:8987"
+    volumes:
+      - ./frontend/frontend:/app
+    restart: unless-stopped
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge 

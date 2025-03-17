@@ -1,0 +1,2008 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dynamic chatBots</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css"
+      rel="stylesheet"
+    />
+    <script
+      src="https://kit.fontawesome.com/a076d05399.js"
+      crossorigin="anonymous"
+    ></script>
+    <style>
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: linear-gradient(to bottom, #d8bfd8, white);
+        height: 100vh;
+      }
+
+      .navbar {
+        background-color: #333366;
+        padding: 12px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      }
+      .brand {
+        color: #ffffff;
+        font-size: 26px;
+        font-weight: 600;
+      }
+      .search-container {
+        position: relative;
+      }
+      .search-input {
+        padding: 8px 14px;
+        border-radius: 18px;
+        border: none;
+        width: 180px;
+        outline: none;
+      }
+
+      .search-input::placeholder {
+        color: #b0b0b0;
+      }
+
+      #example-bot {
+        display: none; /* change it  */
+      }
+
+      .container {
+        margin-top: 20px;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+      }
+      .chatBot-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 20px;
+      }
+      .chatBot {
+        flex-direction: column;
+        background: #f8f8f8;
+        width: 20vw;
+        height: 250px;
+        border: 2px solid #ccc;
+        border-radius: 12px;
+        align-items: center;
+        overflow: hidden;
+        position: relative;
+        margin: 20px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        background-image: url('https://insidetelecom.com/wp-content/uploads/2024/10/AutonomoUS-AI-agent-1024x576.jpg');
+        background-size: cover;
+        background-position: center;
+        cursor: pointer;
+      }
+
+      .chatBot::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 1;
+      }
+
+      .chatBotHeader {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        padding: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: bold;
+        color: white;
+        z-index: 2;
+      }
+
+      .chatBotName {
+        font-size: 24px;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+      }
+
+      .chatBotControls {
+        display: flex;
+        gap: 10px;
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        z-index: 3;
+      }
+
+      .editBtn, .closeBtn {
+        cursor: pointer;
+        font-size: 18px;
+        color: white;
+        background: rgba(0, 0, 0, 0.5);
+        width: 30px;
+        height: 30px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 50%;
+        transition: background 0.3s;
+      }
+
+      .editBtn:hover, .closeBtn:hover {
+        background: rgba(0, 0, 0, 0.8);
+      }
+
+      .chatBotBody {
+        display: none;
+        position: relative;
+        z-index: 3;
+        background: white;
+        padding: 15px;
+        margin-top: 60px; /* Add space below the header */
+        border-radius: 0 0 12px 12px;
+      }
+
+      .iconContainer {
+        display: flex;
+      }
+
+      .chatIcon,
+      .botIcon,
+      .bgImage,
+      .headerImg {
+        flex: 1;
+        text-align: center;
+      }
+
+      .chatIcon,
+      .botIcon {
+        width: 160px;
+      }
+
+      .closeBtn {
+        cursor: pointer;
+        font-size: 18px;
+        transition: color 0.3s;
+      }
+
+      .card {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        align-items: center;
+        gap: 10px;
+        padding: 12px;
+        border: 1px solid #ccc;
+        border-radius: 12px;
+        background: white;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        width: 500px;
+        z-index: 1;
+      }
+
+      .card input {
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        outline: none;
+        font-size: 14px;
+      }
+
+      .name-input {
+        width: 30%;
+      }
+
+      .api-input {
+        width: 50%;
+      }
+
+      .submit-btn {
+        background-color: lightgray;
+        color: black;
+        border: 1px solid #ccc;
+        padding: 8px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: 0.2s;
+      }
+
+      .submit-btn:hover {
+        background-color: gray;
+        color: white;
+      }
+
+      .close-icon {
+        cursor: pointer;
+        font-size: 18px;
+        color: #888;
+        transition: 0.2s;
+        border: none;
+        background: none;
+      }
+
+      .close-icon:hover {
+        color: black;
+      }
+
+      .add-button {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        background: white;
+        border: 2px solid black;
+        border-radius: 10px;
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+        font-size: 24px;
+        font-weight: bold;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1;
+      }
+
+      /* Modal for cropping */
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+      }
+
+      .modal-content {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+      }
+
+      .crop-container {
+        width: 400px;
+        height: 400px;
+        border-radius: 50%;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #000;
+        margin: auto;
+      }
+
+      .crop-container img {
+        max-width: 100%;
+      }
+
+      .buttons {
+        margin-top: 10px;
+      }
+
+      .buttons button {
+        padding: 10px;
+        margin: 5px;
+        border: none;
+        cursor: pointer;
+      }
+
+      .btn-crop {
+        background: #28a745;
+        color: white;
+      }
+
+      .btn-cancel {
+        background: #dc3545;
+        color: white;
+      }
+
+      /* Image container */
+
+      .imagecontainer {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+      }
+
+      .chatIconImageBox,
+      .botIconImageBox {
+        width: 50px;
+        height: 50px;
+        border: 2px solid #ccc;
+        border-radius: 50%;
+        background: #ddd;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        overflow: hidden;
+        position: relative;
+        transition: background 0.3s, border 0.3s;
+      }
+
+      .chatIconImageBox img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: none;
+        border-radius: 50%;
+      }
+
+      .botIconImageBox img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: none;
+        border-radius: 50%;
+      }
+
+      .bgImage {
+        text-align: center;
+      }
+
+      .bgImageBox,
+      .headerImageBox {
+        width: 100px;
+        height: 60px;
+        border: 2px solid #ccc;
+        border-radius: 10px;
+        background: #ddd;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        overflow: hidden;
+        position: relative;
+        transition: background 0.3s, border 0.3s;
+      }
+
+      .bgImageBox img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: none;
+        border-radius: 10px;
+      }
+
+      .headerImg {
+        text-align: center;
+      }
+
+      .headerImageBox img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: none;
+        border-radius: 10px;
+      }
+
+      #headerImageFileInput,
+      #bgImageFileInput,
+      #botIconImageInput,
+      #chatIconImageInput {
+        display: none;
+      }
+
+      .chatIconImageBox:hover,
+      .botIconImageBox:hover,
+      .bgImageBox:hover,
+      .headerImageBox:hover {
+        background: #ddd;
+        border-color: #bbb;
+      }
+
+      .chatInputContainer {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 10px;
+      }
+
+      input[type="text"] {
+        width: 70%;
+        padding: 8px;
+        background: #eee;
+        border: 2px solid #ccc;
+        color: #333;
+        border-radius: 8px;
+        outline: none;
+      }
+
+      input[type="text"]:focus {
+        border-color: #999;
+      }
+
+      button {
+        padding: 8px 12px;
+        margin-left: 8px;
+        background: #ddd;
+        border: 2px solid #ccc;
+        color: #333;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.3s, border 0.3s;
+      }
+
+      button:hover {
+        background: #ccc;
+        border-color: #bbb;
+      }
+
+      .chatBotLink {
+        text-align: center;
+        margin-top: 10px;
+      }
+
+      .botLink {
+        color: #666;
+        text-decoration: none;
+        transition: color 0.3s;
+      }
+
+      .botLink:hover {
+        color: #333;
+      }
+
+      /* Add edit mode styles */
+      .chatBot.edit-mode {
+        height: auto !important;
+        background-color: white !important;
+        cursor: default;
+      }
+      
+      .chatBot.edit-mode::before {
+        opacity: 0;
+      }
+      
+      .chatBot.edit-mode .chatBotBody {
+        display: block !important;
+        position: relative;
+        z-index: 3;
+        background: white;
+        padding: 15px;
+        margin-top: 60px;
+        border-radius: 8px;
+      }
+      
+      /* Make sure all input-related elements in edit mode don't redirect */
+      .chatBot.edit-mode input,
+      .chatBot.edit-mode button,
+      .chatBot.edit-mode .chatIconImageBox,
+      .chatBot.edit-mode .botIconImageBox,
+      .chatBot.edit-mode .bgImageBox,
+      .chatBot.edit-mode .headerImageBox {
+        cursor: pointer;
+        position: relative;
+        z-index: 10;
+      }
+
+      /* Chat interface styles for the chat page */
+      .chat-interface {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        max-width: 1000px;
+        margin: 0 auto;
+        background-color: #f5f5f5;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      }
+
+      .chat-header {
+        background-color: #333366;
+        color: white;
+        padding: 15px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .chat-header-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .bot-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        background-color: #fff;
+      }
+
+      .chat-messages {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .message {
+        max-width: 70%;
+        padding: 12px 15px;
+        border-radius: 18px;
+        position: relative;
+        line-height: 1.5;
+      }
+
+      .user-message {
+        align-self: flex-end;
+        background-color: #dcf8c6;
+        border-bottom-right-radius: 4px;
+      }
+
+      .bot-message {
+        align-self: flex-start;
+        background-color: white;
+        border-bottom-left-radius: 4px;
+      }
+
+      .message-time {
+        font-size: 0.7rem;
+        color: #999;
+        margin-top: 5px;
+        text-align: right;
+      }
+
+      .chat-input-container {
+        padding: 15px;
+        background-color: #f0f0f0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .chat-input {
+        flex: 1;
+        padding: 12px 15px;
+        border: none;
+        border-radius: 20px;
+        background-color: white;
+        outline: none;
+        font-size: 14px;
+      }
+
+      .send-button {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #333366;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        cursor: pointer;
+      }
+
+      .chat-options {
+        display: flex;
+        gap: 10px;
+      }
+
+      .chat-option-button {
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+        font-size: 20px;
+      }
+
+      /* File upload progress and preview */
+      .file-preview {
+        max-width: 200px;
+        max-height: 200px;
+        margin: 10px 0;
+        border-radius: 10px;
+      }
+
+      .upload-progress {
+        height: 5px;
+        background-color: #ddd;
+        border-radius: 5px;
+        margin-top: 5px;
+        overflow: hidden;
+      }
+
+      .progress-bar {
+        height: 100%;
+        background-color: #4CAF50;
+        width: 0%;
+        transition: width 0.3s ease;
+      }
+
+      /* Success/error message styles */
+      .feedback-message {
+        padding: 10px;
+        margin: 5px 0;
+        border-radius: 5px;
+        text-align: center;
+        transition: opacity 0.5s ease;
+      }
+
+      .success-message {
+        background-color: #d4edda;
+        color: #155724;
+      }
+
+      .error-message {
+        background-color: #f8d7da;
+        color: #721c24;
+      }
+
+      /* Responsive design */
+      @media (max-width: 768px) {
+        .chatBot {
+          width: 90%;
+        }
+        
+        .message {
+          max-width: 85%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="brand">Xpectrum AI</div>
+      <div class="search-container">
+        <input
+          type="text"
+          id="search"
+          class="search-input"
+          placeholder="Search..."
+          onkeyup="searchFunction()"
+        />
+      </div>
+    </nav>
+    <button class="add-button" onclick="togglecard()">+</button>
+    <div class="card" id="inputcard" onmousedown="dragElement(event, this)">
+      <input
+        type="text"
+        class="name-input"
+        id="name-input"
+        placeholder="Enter name"
+        onclick="event.stopPropagation()"
+      />
+      <input
+        type="text"
+        class="api-input"
+        id="api-input"
+        placeholder="Enter API key"
+        onclick="event.stopPropagation()"
+      />
+
+      <button class="submit-btn" onclick="addchatBot()">Submit</button>
+      <button class="close-icon" onclick="closecard()">✖</button>
+    </div>
+
+    <div class="container">
+      <div class="chatBot-container" id="chatBotContainer">
+        <div class="chatBot" data-name="vishal" id="example-bot">
+          <div class="chatBotHeader">
+            <div class="chatBotName">Name</div>
+            <div class="chatBotControls">
+              <div class="editBtn" onclick="toggleEditMode(this)">✎</div>
+              <div class="closeBtn" onclick="deleteBot(this)">✕</div>
+            </div>
+          </div>
+          <div class="chatBotCode" style="display:none;">Code</div>
+          <div class="chatBotBody">
+            <div class="chatBotApiKey">Api Key: Key</div>
+            <div class="imagecontainer">
+              <div class="iconContainer">
+                <div class="chatIcon">
+                  <div
+                    class="chatIconImageBox"
+                    id="chatIconImageBox"
+                    onclick="chatIconImageInput(this)"
+                  >
+                    <span id="chatIconUploadText">Chat Icon</span>
+                    <img id="chatIconPreviewImage" />
+                  </div>
+                  <input type="file" id="chatIconImageInput" />
+                </div>
+                <div class="botIcon">
+                  <div
+                    class="botIconImageBox"
+                    id="botIconImageBox"
+                    onclick="botIconImageInput(this)"
+                  >
+                    <span id="botIconUploadText">Bot Icon</span>
+                    <img id="botIconPreviewImage" />
+                  </div>
+                  <input type="file" id="botIconImageInput" />
+                </div>
+              </div>
+              <div class="bgImage">
+                <div
+                  class="bgImageBox"
+                  id="imageBox"
+                  onclick="bgImageInput(this)"
+                >
+                  <span id="bgImageUploadText">BG Image</span>
+                  <img id="previewBgImage" />
+                </div>
+                <input type="file" id="bgImageFileInput" />
+              </div>
+              <div class="headerImg">
+                <div
+                  class="headerImageBox"
+                  id="headerImgaeBox"
+                  onclick="headerImageInput(this)"
+                >
+                  <span id="headerImageUploadText">Header Img</span>
+                  <img id="previewHeaderImage" />
+                </div>
+                <input type="file" id="headerImageFileInput" />
+              </div>
+            </div>
+            <div class="chatInputContainer">
+              <input
+                type="text"
+                id="chatboxtext"
+                placeholder="Enter chat box text ..."
+              />
+              <button onclick="sendChatBoxText(this)">Submit</button>
+            </div>
+            <div class="chatInputContainer">
+              <input
+                type="text"
+                id="chatgradient"
+                placeholder="Enter chat gradient ..."
+              />
+              <button onclick="setChatGradient(this)">Submit</button>
+            </div>
+            <div class="chatBotLink">
+              <a class="botLink" href="link" target="_blank">Link</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="cropModal">
+      <div class="modal-content">
+        <div class="crop-container">
+          <img id="cropImage" />
+        </div>
+        <div class="buttons">
+          <button class="btn-crop" id="cropBtn">Crop & Save</button>
+          <button class="btn-cancel" id="cancelBtn">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Dynamically determine the backend URL based on configuration or current host
+      const BACKEND_PORT = "8000"; // This can be configured based on environment
+      const isProduction = window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1";
+
+      // In production, assume the backend is at the same host but on port 8000
+      // In development, use localhost:8000
+      let backend_url = isProduction 
+        ? `${window.location.protocol}//${window.location.hostname}:${BACKEND_PORT}`
+        : "http://127.0.0.1:8000";
+
+      // Override with environment variable if available (injected at build time)
+      if (typeof BACKEND_URL !== "undefined") {
+        backend_url = BACKEND_URL;
+      }
+
+      // Store deleted bot codes in localStorage to prevent them from reappearing
+      const deletedBots = JSON.parse(localStorage.getItem('deletedBots') || '[]');
+      
+      function togglecard() {
+        let card = document.getElementById("inputcard");
+        card.style.display = card.style.display === "flex" ? "none" : "flex";
+      }
+      function closecard() {
+        document.getElementById("inputcard").style.display = "none";
+      }
+
+      async function addBot(name, apiKey) {
+        try {
+          const response = await fetch(`${backend_url}/generate-html`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            body: JSON.stringify({
+              filename: `${name}`,
+              apiKey: `${apiKey}`,
+            }),
+          });
+        } catch (error) {
+          console.log(error);
+        }
+      }
+
+      async function deleteFile(fileName) {
+        try {
+          const response = await fetch(
+            `${backend_url}/delete-file/${fileName}`,
+            {
+              method: "DELETE",
+            }
+          );
+
+          const data = await response.json();
+
+          if (response.ok) {
+          } else {
+            console.error("Error:", data.detail);
+          }
+        } catch (error) {
+          console.error("Request failed:", error);
+        }
+      }
+
+      function generateSecureCode() {
+        const characters =
+          "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+        const array = new Uint8Array(6);
+        window.crypto.getRandomValues(array);
+        return Array.from(
+          array,
+          (num) => characters[num % characters.length]
+        ).join("");
+      }
+
+      function extractFileInfo(fileName) {
+        // Regular expression to match: name-code.extension
+        const regex = /^(.+?)-(.+?)\.[a-zA-Z0-9]+$/;
+        const match = fileName.match(regex);
+
+        if (match) {
+          return {
+            name: match[1], // Extracted Name
+            code: match[2], // Extracted Code
+          };
+        } else {
+          console.error("Invalid file format:", fileName);
+          return null;
+        }
+      }
+
+      window.addEventListener("load", async () => {
+        try {
+          const response = await fetch(`${backend_url}/get-bots-files`); 
+          const data = await response.json();
+
+          // Convert the stringified list into an array
+          const filesArray = data.files ? data.files.split(", ") : [];
+
+          filesArray.forEach((file) => {
+            const fileInfo = extractFileInfo(file);
+            if (!fileInfo) return; // Skip if format is invalid
+            
+            // Skip deleted bots
+            if (deletedBots.includes(fileInfo.code)) return;
+
+            let sqContainer = document.getElementById("chatBotContainer");
+            const originalBot = document.getElementById("example-bot");
+            const cloneBot = originalBot.cloneNode(true);
+
+            cloneBot.setAttribute("id", "");
+            cloneBot.setAttribute("data-name", ` ${fileInfo.name}`);
+            cloneBot.querySelector(".chatBotName").textContent = fileInfo.name;
+            cloneBot.querySelector(".chatBotCode").textContent = fileInfo.code;
+            cloneBot.querySelector(".chatBotApiKey").textContent = "Api Key:" + "";
+
+            // Set the correct URL format with agent and no .html
+            const botUrl = `${backend_url}/agent/${fileInfo.name}/${fileInfo.code}`;
+            
+            // Make the entire chatBot card clickable to go to the bot URL
+            cloneBot.addEventListener('click', function(e) {
+              // Only open the URL if the card is not in edit mode
+              if (this.classList.contains('edit-mode')) {
+                return;
+              }
+              
+              // Only open the URL if the click was directly on the card (not on buttons)
+              if (e.target.closest('.editBtn') || e.target.closest('.closeBtn')) {
+                return;
+              }
+              
+              window.open(botUrl, '_blank');
+            });
+            
+            cloneBot
+              .querySelector(".botLink")
+              .setAttribute("href", botUrl);
+            cloneBot.querySelector(".botLink").setAttribute("target", "_blank");
+            cloneBot.querySelector(
+              ".botLink"
+            ).textContent = botUrl;
+            
+            // Add event listeners for chatbox text field
+            const chatboxTextField = cloneBot.querySelector('#chatboxtext');
+            if (chatboxTextField) {
+              chatboxTextField.addEventListener('click', function(e) {
+                e.stopPropagation();
+              });
+              chatboxTextField.addEventListener('focus', function(e) {
+                e.stopPropagation();
+              });
+              chatboxTextField.addEventListener('input', function(e) {
+                e.stopPropagation();
+              });
+            }
+            
+            // Add event listeners for chat gradient field
+            const chatGradientField = cloneBot.querySelector('#chatgradient');
+            if (chatGradientField) {
+              chatGradientField.addEventListener('click', function(e) {
+                e.stopPropagation();
+              });
+              chatGradientField.addEventListener('focus', function(e) {
+                e.stopPropagation();
+              });
+              chatGradientField.addEventListener('input', function(e) {
+                e.stopPropagation();
+              });
+            }
+            
+            // Make sure all image containers stop propagation
+            const imageContainers = cloneBot.querySelectorAll('.chatIconImageBox, .botIconImageBox, .bgImageBox, .headerImageBox');
+            imageContainers.forEach(container => {
+              container.addEventListener('click', function(e) {
+                e.stopPropagation();
+              });
+            });
+            
+            // Load images and other data
+            fetch(`${backend_url}/get_chatIcon/${fileInfo.code}`)
+              .then((response) => {
+                if (!response.ok) throw new Error("Failed to fetch image");
+                return response.json();
+              })
+              .then((data) => {
+                cloneBot.querySelector("#chatIconPreviewImage").src =
+                  data.image_data;
+                cloneBot.querySelector("#chatIconPreviewImage").style.display =
+                  "block";
+                cloneBot.querySelector("#chatIconUploadText").style.display =
+                  "none";
+              })
+              .catch((error) => console.error("Error loading image:", error));
+            
+            fetch(`${backend_url}/get_botIcon/${fileInfo.code}`)
+              .then((response) => {
+                if (!response.ok) throw new Error("Failed to fetch image");
+                return response.json();
+              })
+              .then((data) => {
+                cloneBot.querySelector("#botIconPreviewImage").src =
+                  data.image_data;
+                cloneBot.querySelector("#botIconPreviewImage").style.display =
+                  "block";
+                cloneBot.querySelector("#botIconUploadText").style.display =
+                  "none";
+              })
+              .catch((error) => console.error("Error loading image:", error));
+
+            fetch(`${backend_url}/get_bg/${fileInfo.code}`)
+              .then((response) => {
+                if (!response.ok) throw new Error("Failed to fetch image");
+                return response.json();
+              })
+              .then((data) => {
+                cloneBot.querySelector("#previewBgImage").src = data.image_data;
+                cloneBot.querySelector("#previewBgImage").style.display =
+                  "block";
+                cloneBot.querySelector("#bgImageUploadText").style.display =
+                  "none";
+              })
+              .catch((error) => console.error("Error loading image:", error));
+
+            fetch(`${backend_url}/header_img/${fileInfo.code}`)
+              .then((response) => {
+                if (!response.ok) throw new Error("Failed to fetch image");
+                return response.json();
+              })
+              .then((data) => {
+                cloneBot.querySelector("#previewHeaderImage").src = data.data;
+                cloneBot.querySelector("#previewHeaderImage").style.display =
+                  "block";
+                cloneBot.querySelector("#headerImageUploadText").style.display =
+                  "none";
+              })
+              .catch((error) => console.error("Error loading image:", error));
+
+            fetch(`${backend_url}/chatbox_text/${fileInfo.code}`)
+              .then((response) => {
+                if (!response.ok) throw new Error("Failed to fetch data");
+                return response.json();
+              })
+              .then((data) => {
+                cloneBot.querySelector("#chatboxtext").value = data.data;
+              })
+              .catch((error) => console.error("Error loading image:", error));
+            
+            sqContainer.appendChild(cloneBot);
+          });
+        } catch (error) {
+          console.error("Error fetching bot files:", error);
+          return [];
+        }
+      });
+
+      function addchatBot() {
+        let name = document.getElementById("name-input").value;
+        let apiKey = document.getElementById("api-input").value;
+        let code = generateSecureCode();
+        
+        // If this bot was previously deleted, remove it from deletedBots
+        const index = deletedBots.indexOf(code);
+        if (index > -1) {
+          deletedBots.splice(index, 1);
+          localStorage.setItem('deletedBots', JSON.stringify(deletedBots));
+        }
+
+        // Create URL with slash but store with hyphen in the backend
+        let botCode = name.toLowerCase() + "/" + code;
+
+        addBot(botCode, apiKey);
+
+        let sqContainer = document.getElementById("chatBotContainer");
+
+        const originalBot = document.getElementById("example-bot");
+
+        const cloneBot = originalBot.cloneNode(true);
+
+        cloneBot.setAttribute("id", "");
+        cloneBot.setAttribute("data-name", ` ${name}`);
+        cloneBot.querySelector(".chatBotName").textContent = name;
+        cloneBot.querySelector(".chatBotCode").textContent = code;
+        cloneBot.querySelector(".chatBotApiKey").textContent =
+          "Api Key:" + apiKey;
+        
+        // Use the correct URL format with agent and no .html
+        const botUrl = `${backend_url}/agent/${name.toLowerCase()}/${code}`;
+        
+        // Make the entire chatBot card clickable to go to the bot URL
+        cloneBot.addEventListener('click', function(e) {
+          // Only open the URL if the card is not in edit mode
+          if (this.classList.contains('edit-mode')) {
+            return;
+          }
+          
+          // Only open the URL if the click was directly on the card (not on buttons)
+          if (e.target.closest('.editBtn') || e.target.closest('.closeBtn')) {
+            return;
+          }
+          
+          window.open(botUrl, '_blank');
+        });
+        
+        // Add event listeners for chatbox text field
+        const chatboxTextField = cloneBot.querySelector('#chatboxtext');
+        if (chatboxTextField) {
+          chatboxTextField.addEventListener('click', function(e) {
+            e.stopPropagation();
+          });
+          chatboxTextField.addEventListener('focus', function(e) {
+            e.stopPropagation();
+          });
+          chatboxTextField.addEventListener('input', function(e) {
+            e.stopPropagation();
+          });
+        }
+        
+        // Add event listeners for chat gradient field
+        const chatGradientField = cloneBot.querySelector('#chatgradient');
+        if (chatGradientField) {
+          chatGradientField.addEventListener('click', function(e) {
+            e.stopPropagation();
+          });
+          chatGradientField.addEventListener('focus', function(e) {
+            e.stopPropagation();
+          });
+          chatGradientField.addEventListener('input', function(e) {
+            e.stopPropagation();
+          });
+        }
+        
+        // Make sure all image containers stop propagation
+        const imageContainers = cloneBot.querySelectorAll('.chatIconImageBox, .botIconImageBox, .bgImageBox, .headerImageBox');
+        imageContainers.forEach(container => {
+          container.addEventListener('click', function(e) {
+            e.stopPropagation();
+          });
+        });
+        
+        cloneBot
+          .querySelector(".botLink")
+          .setAttribute("href", botUrl);
+        cloneBot.querySelector(".botLink").setAttribute("target", "_blank");
+        cloneBot.querySelector(
+          ".botLink"
+        ).textContent = botUrl;
+        sqContainer.appendChild(cloneBot);
+
+        closecard();
+      }
+      function dragElement(event, elmnt) {
+        let pos1 = 0,
+          pos2 = 0,
+          pos3 = 0,
+          pos4 = 0;
+        if (
+          event.target.tagName.toLowerCase() === "input" ||
+          event.target.tagName.toLowerCase() === "select" ||
+          event.target.tagName.toLowerCase() === "button"
+        ) {
+          return;
+        }
+        event.preventDefault();
+        pos3 = event.clientX;
+        pos4 = event.clientY;
+        document.onmouseup = closeDragElement;
+        document.onmousemove = elementDrag;
+        function elementDrag(e) {
+          e.preventDefault();
+          pos1 = pos3 - e.clientX;
+          pos2 = pos4 - e.clientY;
+          pos3 = e.clientX;
+          pos4 = e.clientY;
+          elmnt.style.top = elmnt.offsetTop - pos2 + "px";
+          elmnt.style.left = elmnt.offsetLeft - pos1 + "px";
+        }
+        function closeDragElement() {
+          document.onmouseup = null;
+          document.onmousemove = null;
+        }
+      }
+
+      function searchFunction() {
+        const searchValue = document
+          .getElementById("search")
+          .value.toLowerCase();
+        const boxes = document.querySelectorAll(".chatBot");
+
+        boxes.forEach((box) => {
+          const name = box.getAttribute("data-name").toLowerCase();
+          if (searchValue === "" || name.includes(searchValue)) {
+            box.style.display = "flex";
+          } else {
+            box.style.display = "none";
+          }
+        });
+      }
+
+      // Ensure the delete button click doesn't bubble up and works correctly
+      async function deleteBot(button) {
+        // Stop event propagation to prevent card click
+        event.stopPropagation();
+        
+        // Find the nearest .chatBot ancestor
+        const bot = button.closest('.chatBot');
+        const botName = bot
+          .querySelector(".chatBotName")
+          .textContent.toLowerCase();
+        const botCode = bot.querySelector(".chatBotCode").textContent;
+        
+        // Store the bot code in localStorage so it doesn't reappear on refresh
+        deletedBots.push(botCode);
+        localStorage.setItem('deletedBots', JSON.stringify(deletedBots));
+        
+        // Delete the file using the correct format
+        await deleteFile(botName + "-" + botCode + ".html");
+        
+        // Remove the bot element from the DOM
+        bot.remove();
+        
+        // Also remove any images or other associated files
+        try {
+          // Delete chat icon
+          fetch(`${backend_url}/delete-file/${botName}-${botCode}-chaticon.png`, {
+            method: "DELETE",
+          });
+          
+          // Delete bot icon
+          fetch(`${backend_url}/delete-file/${botName}-${botCode}-boticon.png`, {
+            method: "DELETE",
+          });
+          
+          // Delete header image
+          fetch(`${backend_url}/delete-file/${botName}-${botCode}-header.png`, {
+            method: "DELETE",
+          });
+          
+          // Delete background image
+          fetch(`${backend_url}/delete-file/${botName}-${botCode}-bg.png`, {
+            method: "DELETE",
+          });
+        } catch (error) {
+          console.error("Error deleting associated files:", error);
+        }
+      }
+
+      const cropModal = document.getElementById("cropModal");
+      const cropImage = document.getElementById("cropImage");
+      const cropBtn = document.getElementById("cropBtn");
+      const cancelBtn = document.getElementById("cancelBtn");
+
+      let cropper;
+
+      // Fix image input functions to prevent event propagation and accept all image formats
+      function chatIconImageInput(button) {
+  event.stopPropagation();
+  
+  const parentDiv = button.parentElement.parentElement.parentElement;
+  const bot = parentDiv.parentElement.parentElement;
+  let flag = false;
+
+  const botName = bot
+    .querySelector(".chatBotName")
+    .textContent.toLowerCase();
+  const botCode = bot.querySelector(".chatBotCode").textContent;
+
+  const chatIconImageInput = parentDiv.querySelector(
+    "#chatIconImageInput"
+  );
+  const chatIconPreviewImage = parentDiv.querySelector(
+    "#chatIconPreviewImage"
+  );
+  const chatIconUploadText = parentDiv.querySelector(
+    "#chatIconUploadText"
+  );
+
+  chatIconImageInput.click();
+
+  chatIconImageInput.removeEventListener("change", chatIconChangeHandler);
+  chatIconImageInput.addEventListener("change", chatIconChangeHandler);
+
+  function chatIconChangeHandler(event) {
+    event.stopPropagation();
+    const file = event.target.files[0];
+    flag = true;
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        cropImage.src = e.target.result;
+        cropModal.style.display = "flex";
+
+        if (cropper) cropper.destroy();
+
+        cropper = new Cropper(cropImage, {
+          aspectRatio: 1,
+          viewMode: 1,
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  cropBtn.onclick = () => {
+    if (flag && cropper) {
+      const croppedCanvas = cropper.getCroppedCanvas({
+        width: 50,
+        height: 50,
+      });
+
+      const imageDataUrl = croppedCanvas.toDataURL("image/png");
+      const payload = {
+        bot_code: botCode,
+        filename: `${botName}-${botCode}-chaticon.png`,
+        image_data: imageDataUrl,
+      };
+
+      fetch(`${backend_url}/chatIconSave`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      })
+        .then((response) => {
+          if (!response.ok) throw new Error("Upload failed");
+          return response.json();
+        })
+        .then((data) => {
+          showFeedbackMessage("Image uploaded successfully!", "success");
+        })
+        .catch((error) => {
+          console.error("Upload Error:", error);
+          showFeedbackMessage("Failed to upload image", "error");
+        });
+
+      chatIconPreviewImage.src = imageDataUrl;
+      chatIconPreviewImage.style.display = "block";
+      chatIconUploadText.style.display = "none";
+      cropModal.style.display = "none";
+      chatIconImageInput.value = "";
+      flag = false;
+    }
+  };
+
+  cancelBtn.onclick = () => {
+    cropModal.style.display = "none";
+    chatIconImageInput.value = "";
+  };
+
+  cropModal.onclick = (event) => {
+    if (event.target === cropModal) {
+      cropModal.style.display = "none";
+    }
+  };
+}
+
+
+
+      function botIconImageInput(button) {
+  event.stopPropagation();
+  
+  const parentDiv = button.parentElement.parentElement.parentElement;
+  const bot = parentDiv.parentElement.parentElement;
+  let flag = false;
+
+  const botName = bot
+    .querySelector(".chatBotName")
+    .textContent.toLowerCase();
+  const botCode = bot.querySelector(".chatBotCode").textContent;
+
+  const botIconImageInput = parentDiv.querySelector("#botIconImageInput");
+  const botIconPreviewImage = parentDiv.querySelector(
+    "#botIconPreviewImage"
+  );
+  const botIconUploadText = parentDiv.querySelector("#botIconUploadText");
+
+  botIconImageInput.click();
+
+  botIconImageInput.removeEventListener("change", botIconChangeHandler);
+  botIconImageInput.addEventListener("change", botIconChangeHandler);
+
+  function botIconChangeHandler(event) {
+    event.stopPropagation();
+    const file = event.target.files[0];
+    flag = true;
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        cropImage.src = e.target.result;
+        cropModal.style.display = "flex";
+
+        if (cropper) cropper.destroy();
+
+        cropper = new Cropper(cropImage, {
+          aspectRatio: 1,
+          viewMode: 1,
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  cropBtn.onclick = () => {
+    if (flag && cropper) {
+      const croppedCanvas = cropper.getCroppedCanvas({
+        width: 60,
+        height: 60,
+      });
+
+      const imageDataUrl = croppedCanvas.toDataURL("image/png");
+      const payload = {
+        bot_code: botCode,
+        filename: `${botName}-${botCode}-boticon.png`,
+        image_data: imageDataUrl,
+      };
+
+      fetch(`${backend_url}/botIconSave`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      })
+        .then((response) => {
+          if (!response.ok) throw new Error("Upload failed");
+          return response.json();
+        })
+        .then((data) => {
+          showFeedbackMessage("Image uploaded successfully!", "success");
+        })
+        .catch((error) => {
+          console.error("Upload Error:", error);
+          showFeedbackMessage("Failed to upload image", "error");
+        });
+
+      botIconPreviewImage.src = imageDataUrl;
+      botIconPreviewImage.style.display = "block";
+      botIconUploadText.style.display = "none";
+      cropModal.style.display = "none";
+      botIconImageInput.value = "";
+      flag = false;
+    }
+  };
+
+  cancelBtn.onclick = () => {
+    cropModal.style.display = "none";
+    botIconImageInput.value = "";
+  };
+
+  cropModal.onclick = (event) => {
+    if (event.target === cropModal) {
+      cropModal.style.display = "none";
+    }
+  };
+}
+
+
+      function bgImageInput(button) {
+        // Stop event propagation
+        event.stopPropagation();
+        
+        const parentDiv = button.parentElement.parentElement;
+        const bot = parentDiv.parentElement.parentElement;
+        let flag = false;
+
+        const botName = bot
+          .querySelector(".chatBotName")
+          .textContent.toLowerCase();
+        const botCode = bot.querySelector(".chatBotCode").textContent;
+
+        const bgImageFileInput = parentDiv.querySelector("#bgImageFileInput");
+        const previewBgImage = parentDiv.querySelector("#previewBgImage");
+        const bgImageUploadText = parentDiv.querySelector("#bgImageUploadText");
+
+        // Accept all image formats - removed the accept attribute restriction
+        bgImageFileInput.click();
+
+        // Remove existing listeners
+        bgImageFileInput.removeEventListener("change", bgImageChangeHandler);
+        bgImageFileInput.addEventListener("change", bgImageChangeHandler);
+
+        function bgImageChangeHandler(event) {
+          event.stopPropagation();
+          const file = event.target.files[0];
+          flag = true;
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              // Show preview without cropping
+              previewBgImage.src = e.target.result;
+              previewBgImage.style.display = "block";
+              bgImageUploadText.style.display = "none";
+
+              // Save the image
+              saveImage(e.target.result, botCode, botName);
+            };
+            reader.readAsDataURL(file);
+          }
+        }
+      }
+
+      function saveImage(imageDataUrl, botCode, botName) {
+        const payload = {
+          code: botCode,
+          image: imageDataUrl,
+        };
+
+        fetch(`${backend_url}/bgSave`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        })
+          .then((response) => {
+            if (!response.ok) throw new Error("Upload failed");
+            return response.json();
+          })
+          .then((data) => {
+            // Show success message
+            showFeedbackMessage("Background image uploaded successfully!", "success");
+          })
+          .catch((error) => {
+            console.error("Upload Error:", error);
+            showFeedbackMessage("Failed to upload background image", "error");
+          });
+      }
+
+      function sendChatBoxText(button) {
+        // Stop event propagation
+        event.stopPropagation();
+        
+        const chatBotElement = button.closest('.chatBot');
+        const code = chatBotElement.querySelector(".chatBotCode").textContent;
+        const chatboxtext = chatBotElement.querySelector("#chatboxtext").value;
+        
+        // Change the button text temporarily to indicate processing
+        const originalButtonText = button.textContent;
+        button.textContent = "Saving...";
+        button.disabled = true;
+
+        console.log("Saving chat text:", chatboxtext, "for code:", code);
+
+        fetch(`${backend_url}/chatboxtext`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ text: chatboxtext, code: code }),
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Failed to save chat box text");
+            }
+            return response.json();
+          })
+          .then((data) => {
+            // Show success feedback
+            button.textContent = "Saved!";
+            button.style.backgroundColor = "#4CAF50";
+            button.style.color = "white";
+            
+            // Reset button after 2 seconds
+            setTimeout(() => {
+              button.textContent = originalButtonText;
+              button.style.backgroundColor = "";
+              button.style.color = "";
+              button.disabled = false;
+            }, 2000);
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            button.textContent = "Failed!";
+            button.style.backgroundColor = "#f44336";
+            button.style.color = "white";
+            
+            // Reset button after 2 seconds
+            setTimeout(() => {
+              button.textContent = originalButtonText;
+              button.style.backgroundColor = "";
+              button.style.color = "";
+              button.disabled = false;
+            }, 2000);
+          });
+      }
+
+      function setChatGradient(button) {
+        // Stop event propagation
+        event.stopPropagation();
+        
+        const chatBotElement = button.closest('.chatBot');
+        const code = chatBotElement.querySelector(".chatBotCode").textContent;
+        const chatgradient = chatBotElement.querySelector("#chatgradient").value;
+        
+        console.log("Saving chat gradient:", chatgradient, "for code:", code);
+        
+        // Change the button text temporarily to indicate processing
+        const originalButtonText = button.textContent;
+        button.textContent = "Saving...";
+        button.disabled = true;
+
+        fetch(`${backend_url}/chatgradient`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ gradient: chatgradient, code: code }),
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Failed to save chat gradient");
+            }
+            return response.json();
+          })
+          .then((data) => {
+            // Show success feedback
+            button.textContent = "Saved!";
+            button.style.backgroundColor = "#4CAF50";
+            button.style.color = "white";
+            
+            // Reset button after 2 seconds
+            setTimeout(() => {
+              button.textContent = originalButtonText;
+              button.style.backgroundColor = "";
+              button.style.color = "";
+              button.disabled = false;
+            }, 2000);
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            button.textContent = "Failed!";
+            button.style.backgroundColor = "#f44336";
+            button.style.color = "white";
+            
+            // Reset button after 2 seconds
+            setTimeout(() => {
+              button.textContent = originalButtonText;
+              button.style.backgroundColor = "";
+              button.style.color = "";
+              button.disabled = false;
+            }, 2000);
+          });
+      }
+
+      function headerImageInput(button) {
+        // Stop event propagation
+        event.stopPropagation();
+        
+        const parentDiv = button.parentElement.parentElement;
+        const bot = parentDiv.parentElement.parentElement;
+        let flag = false;
+
+        const botName = bot
+          .querySelector(".chatBotName")
+          .textContent.toLowerCase();
+        const botCode = bot.querySelector(".chatBotCode").textContent;
+
+        const headerImageFileInput = parentDiv.querySelector(
+          "#headerImageFileInput"
+        );
+        const previewHeaderImage = parentDiv.querySelector(
+          "#previewHeaderImage"
+        );
+        const headerImageUploadText = parentDiv.querySelector(
+          "#headerImageUploadText"
+        );
+
+        // Accept all image formats - removed the accept attribute restriction
+        headerImageFileInput.click();
+
+        // Remove existing listeners
+        headerImageFileInput.removeEventListener("change", headerImageChangeHandler);
+        headerImageFileInput.addEventListener("change", headerImageChangeHandler);
+
+        function headerImageChangeHandler(event) {
+          event.stopPropagation();
+          const file = event.target.files[0];
+          flag = true;
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              // Show preview without cropping
+              previewHeaderImage.src = e.target.result;
+              previewHeaderImage.style.display = "block";
+              headerImageUploadText.style.display = "none";
+
+              // Save the image
+              saveHeaderImage(e.target.result, botCode, botName);
+            };
+            reader.readAsDataURL(file);
+          }
+        }
+      }
+
+      function saveHeaderImage(imageDataUrl, botCode, botName) {
+        const payload = {
+          code: botCode,
+          image: imageDataUrl,
+        };
+
+        fetch(`${backend_url}/headerImg`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        })
+          .then((response) => {
+            if (!response.ok) throw new Error("Upload failed");
+            return response.json();
+          })
+          .then((data) => {
+            // Show success message
+            showFeedbackMessage("Header image uploaded successfully!", "success");
+          })
+          .catch((error) => {
+            console.error("Upload Error:", error);
+            showFeedbackMessage("Failed to upload header image", "error");
+          });
+      }
+
+      // Function to show feedback messages
+      function showFeedbackMessage(message, type) {
+        // Create a feedback message element
+        const feedbackElement = document.createElement('div');
+        feedbackElement.className = `feedback-message ${type === 'success' ? 'success-message' : 'error-message'}`;
+        feedbackElement.textContent = message;
+        
+        // Append to body
+        document.body.appendChild(feedbackElement);
+        
+        // Position it at the bottom of the screen
+        feedbackElement.style.position = 'fixed';
+        feedbackElement.style.bottom = '20px';
+        feedbackElement.style.left = '50%';
+        feedbackElement.style.transform = 'translateX(-50%)';
+        feedbackElement.style.zIndex = '1000';
+        feedbackElement.style.padding = '10px 20px';
+        feedbackElement.style.borderRadius = '5px';
+        
+        // Remove after 3 seconds
+        setTimeout(() => {
+          feedbackElement.style.opacity = '0';
+          setTimeout(() => {
+            document.body.removeChild(feedbackElement);
+          }, 500);
+        }, 3000);
+      }
+
+      // Improve the toggle edit mode function
+      function toggleEditMode(button) {
+        // Stop event propagation to prevent card click
+        event.stopPropagation();
+        
+        const bot = button.closest('.chatBot');
+        const body = bot.querySelector('.chatBotBody');
+        
+        if (body.style.display === 'block') {
+          // Exit edit mode
+          body.style.display = 'none';
+          bot.style.height = '250px';
+          // Remove overlay background to show the regular card
+          bot.style.backgroundColor = '';
+          bot.classList.remove('edit-mode');
+        } else {
+          // Enter edit mode
+          body.style.display = 'block';
+          bot.style.height = 'auto';
+          // Add solid background to override the image when in edit mode
+          bot.style.backgroundColor = 'white';
+          bot.classList.add('edit-mode');
+        }
+      }
+
+      // Update with new features
+      function setupChatInterfaceImageUpdates() {
+  window.updateBotIcon = function(botCode, botName) {
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*'; // Accept all image formats
+    
+    fileInput.onchange = function(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const image = new Image();
+          image.onload = function() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const size = Math.min(image.width, image.height);
+            
+            canvas.width = 100;
+            canvas.height = 100;
+            
+            ctx.beginPath();
+            ctx.arc(50, 50, 50, 0, Math.PI * 2, true);
+            ctx.closePath();
+            ctx.clip();
+            
+            const scale = size / 100;
+            const x = (image.width - size) / 2 / scale;
+            const y = (image.height - size) / 2 / scale;
+            
+            ctx.drawImage(image, x, y, size / scale, size / scale, 0, 0, 100, 100);
+            
+            const imageDataUrl = canvas.toDataURL('image/png');
+            
+            document.querySelector('.bot-avatar').src = imageDataUrl;
+            
+            const payload = {
+              bot_code: botCode,
+              filename: `${botName}-${botCode}-boticon.png`,
+              image_data: imageDataUrl,
+            };
+            
+            fetch(`${backend_url}/botIconSave`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(payload),
+            })
+            .then(response => {
+              if (!response.ok) throw new Error("Upload failed");
+              return response.json();
+            })
+            .then(data => {
+              showChatInterfaceMessage("Bot icon updated successfully!");
+            })
+            .catch(error => {
+              console.error("Upload Error:", error);
+              showChatInterfaceMessage("Failed to update bot icon", true);
+            });
+          };
+          image.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+    
+    fileInput.click();
+  };
+  
+  window.updateChatIcon = function(botCode, botName) {
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*'; // Accept all image formats
+    
+    fileInput.onchange = function(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const image = new Image();
+          image.onload = function() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const size = Math.min(image.width, image.height);
+            
+            canvas.width = 50;
+            canvas.height = 50;
+            
+            ctx.beginPath();
+            ctx.arc(25, 25, 25, 0, Math.PI * 2, true);
+            ctx.closePath();
+            ctx.clip();
+            
+            const scale = size / 50;
+            const x = (image.width - size) / 2 / scale;
+            const y = (image.height - size) / 2 / scale;
+            
+            ctx.drawImage(image, x, y, size / scale, size / scale, 0, 0, 50, 50);
+            
+            const imageDataUrl = canvas.toDataURL('image/png');
+            
+            const payload = {
+              bot_code: botCode,
+              filename: `${botName}-${botCode}-chaticon.png`,
+              image_data: imageDataUrl,
+            };
+            
+            fetch(`${backend_url}/chatIconSave`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(payload),
+            })
+            .then(response => {
+              if (!response.ok) throw new Error("Upload failed");
+              return response.json();
+            })
+            .then(data => {
+              showChatInterfaceMessage("Chat icon updated successfully!");
+            })
+            .catch(error => {
+              console.error("Upload Error:", error);
+              showChatInterfaceMessage("Failed to update chat icon", true);
+            });
+          };
+          image.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+    
+    fileInput.click();
+  };
+
+  // New function to update chat background
+  window.updateChatBackground = function(botCode, botName) {
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*'; // Accept all image formats
+    
+    fileInput.onchange = function(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const imageDataUrl = e.target.result;
+          
+          // Apply background image to chat-messages container
+          const chatMessages = document.querySelector('.chat-messages');
+          chatMessages.style.backgroundImage = `url(${imageDataUrl})`;
+          chatMessages.style.backgroundSize = 'cover';
+          chatMessages.style.backgroundPosition = 'center';
+          
+          // Create payload for saving
+          const payload = {
+            bot_code: botCode,
+            filename: `${botName}-${botCode}-background.png`,
+            image_data: imageDataUrl,
+          };
+          
+          fetch(`${backend_url}/chatBackgroundSave`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+          })
+          .then(response => {
+            if (!response.ok) throw new Error("Upload failed");
+            return response.json();
+          })
+          .then(data => {
+            showChatInterfaceMessage("Chat background updated successfully!");
+          })
+          .catch(error => {
+            console.error("Upload Error:", error);
+            showChatInterfaceMessage("Failed to update chat background", true);
+          });
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+    
+    fileInput.click();
+  };
+}
+
+function createChatInterface(botName, botIcon, botCode, chatBackground) {
+  return `
+    <div class="chat-interface">
+      <div class="chat-header">
+        <div class="chat-header-title">
+          <img src="${botIcon || 'default-bot-icon.png'}" alt="${botName}" class="bot-avatar" 
+               onclick="updateBotIcon('${botCode}', '${botName}')" 
+               style="cursor: pointer;" title="Click to update bot icon">
+          <h2>${botName}</h2>
+        </div>
+        <div class="chat-options">
+          <button class="chat-option-button" onclick="updateChatIcon('${botCode}', '${botName}')" 
+                  title="Update chat icon">
+            <i class="fas fa-user-circle"></i>
+          </button>
+          <button class="chat-option-button" onclick="updateChatBackground('${botCode}', '${botName}')" 
+                  title="Update chat background">
+            <i class="fas fa-image"></i>
+          </button>
+          <button class="chat-option-button">⋮</button>
+        </div>
+      </div>
+      <div class="chat-messages" id="chat-messages" style="${chatBackground ? `background-image: url(${chatBackground}); background-size: cover; background-position: center;` : ''}">
+        <!-- Messages will be added here dynamically -->
+        <div class="message bot-message">
+          Hello! How can I assist you today?
+          <div class="message-time">Just now</div>
+        </div>
+      </div>
+      <div class="chat-input-container">
+        <div class="chat-input-tools">
+          <button class="chat-tool-button" onclick="updateChatIcon('${botCode}', '${botName}')" title="Upload chat icon">
+            <i class="fas fa-user-circle"></i>
+          </button>
+          <button class="chat-tool-button" onclick="updateChatBackground('${botCode}', '${botName}')" title="Upload background image">
+            <i class="fas fa-image"></i>
+          </button>
+        </div>
+        <input type="text" class="chat-input" id="user-input" placeholder="Type your message...">
+        <button class="send-button" onclick="sendMessage()">
+          <i class="fas fa-paper-plane"></i>
+        </button>
+      </div>
+    </div>
+  `;
+}
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+  </body>
+</html>

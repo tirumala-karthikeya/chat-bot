@@ -1,0 +1,14 @@
+FROM nginx:alpine
+
+# Copy the entrypoint script and make it executable
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+# Create a directory for source files
+RUN mkdir -p /frontend_source
+
+# Copy frontend files to source directory
+COPY frontend/ /frontend_source/
+
+# Use our custom entrypoint script
+ENTRYPOINT ["/entrypoint.sh"] 
